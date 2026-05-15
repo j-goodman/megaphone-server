@@ -19,7 +19,7 @@ let db
 
 async function connectDB() {
     await client.connect()
-    db = client.db("testdb")
+    db = client.db(process.env.MONGO_DB_NAME)
     console.log("Connected to MongoDB")
 }
 
