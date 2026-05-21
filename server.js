@@ -2,6 +2,7 @@ const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb')
 require('dotenv').config()
 const uri = process.env.MONGO_URI
 const express = require("express")
+const crypto = require("crypto")
 
 const app = express()
 app.use(express.json())
@@ -55,6 +56,30 @@ app.get("/", (req, res) => {
 app.get("/posts", async (req, res) => {
     const posts = await db.collection("posts").find().toArray()
     res.json(posts)
+})
+
+app.post("/users", async (req, res) => {
+    const username = req.body.username
+    const password = req.body.password
+
+    const salt = crypto.randomBytes(16)
+
+    crypto.pbkdf2(password, salt, 310000, 32, "sha256", async (err, hashedPassword) => {
+        if (err) {
+            return res.status(500).json({"message": "Failed to hash password."})
+        }
+
+        const insertResult = await db.collection("users").insertOne({
+            username: username,
+            hashed_password: hashedPassword.toString("base64"),
+            salt: salt.toString("base64")
+        })
+
+        return res.status(201).json({
+            _id: insertResult.insertId,
+            username: username
+        })
+    })
 })
 
 app.post("/posts", async (req, res) => {
