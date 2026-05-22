@@ -58,6 +58,10 @@ app.get("/posts", async (req, res) => {
     res.json(posts)
 })
 
+app.get("/newuser", (req, res) => {
+    res.sendFile("newuser.html", {root: "../megaphone-frontend"})
+})
+
 app.post("/users", async (req, res) => {
     const username = req.body.username
     const password = req.body.password
